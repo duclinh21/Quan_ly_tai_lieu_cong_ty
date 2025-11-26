@@ -194,6 +194,35 @@ Hệ thống sử dụng 10 bảng chính:
 9. AuditLogs - Nhật ký Kiểm toán
 10. Tags - Thẻ/Từ khóa
 
+## Deployment
+
+### GitHub Repository
+Repository này được lưu trữ tại: `https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME`
+
+### Clone Repository
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
+cd YOUR_REPOSITORY_NAME
+```
+
+### Cài đặt Dependencies
+```bash
+# Cài đặt dependencies cho cả frontend và backend
+npm install
+
+# Hoặc cài đặt riêng từng phần
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+## Contributing
+
+1. Fork repository
+2. Tạo feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Tạo Pull Request
+
 ## License
 
 MIT
