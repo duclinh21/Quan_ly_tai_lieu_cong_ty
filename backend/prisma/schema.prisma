@@ -1,0 +1,191 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  username    String   @unique
+  password    String
+  fullName    String   @map("full_name")
+  departmentId String? @map("department_id")
+  roleId      String   @map("role_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  role         Role         @relation(fields: [roleId], references: [id])
+  documents    Document[]   @relation("DocumentOwner")
+  permissions  Permission[]
+  checkouts    Checkout[]
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users       User[]
+  permissions Permission[]
+
+  @@map("roles")
+}
+
+model Document {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  fileName    String   @map("file_name")
+  fileUrl     String   @map("file_url")
+  fileSize    Int      @map("file_size")
+  mimeType    String   @map("mime_type")
+  categoryId  String?  @map("category_id")
+  departmentId String? @map("department_id")
+  ownerId     String   @map("owner_id")
+  version     Int      @default(1)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  department  Department?  @relation(fields: [departmentId], references: [id])
+  owner       User         @relation("DocumentOwner", fields: [ownerId], references: [id])
+  versions    Version[]
+  checkouts   Checkout[]
+  permissions Permission[]
+  tags        DocumentTag[]
+  auditLogs   AuditLog[]
+
+  @@map("documents")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  documents   Document[]
+
+  @@map("categories")
+}
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  users       User[]
+  documents   Document[]
+  permissions Permission[]
+
+  @@map("departments")
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  documentId  String   @map("document_id")
+  userId      String?  @map("user_id")
+  roleId      String?  @map("role_id")
+  departmentId String? @map("department_id")
+  canRead     Boolean  @default(false) @map("can_read")
+  canWrite    Boolean  @default(false) @map("can_write")
+  canDelete   Boolean  @default(false) @map("can_delete")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  document    Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role?      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  department  Department? @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  @@map("permissions")
+}
+
+model Version {
+  id          String   @id @default(uuid())
+  documentId  String   @map("document_id")
+  version     Int
+  fileName    String   @map("file_name")
+  fileUrl     String   @map("file_url")
+  fileSize    Int      @map("file_size")
+  mimeType    String   @map("mime_type")
+  changeNote  String?  @db.Text @map("change_note")
+  createdBy   String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, version])
+  @@map("versions")
+}
+
+model Checkout {
+  id          String   @id @default(uuid())
+  documentId  String   @unique @map("document_id")
+  userId      String   @map("user_id")
+  checkedOutAt DateTime @default(now()) @map("checked_out_at")
+  expiresAt   DateTime? @map("expires_at")
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("checkouts")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  documentId  String?  @map("document_id")
+  action      String   // upload, download, edit, delete, permission_change, etc.
+  details     String?  @db.Text
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @db.Text @map("user_agent")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user        User      @relation(fields: [userId], references: [id])
+  document    Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+model Tag {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  documents   DocumentTag[]
+
+  @@map("tags")
+}
+
+model DocumentTag {
+  id          String   @id @default(uuid())
+  documentId  String   @map("document_id")
+  tagId       String   @map("tag_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  tag         Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, tagId])
+  @@map("document_tags")
+}
+
