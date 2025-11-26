@@ -197,12 +197,12 @@ Hệ thống sử dụng 10 bảng chính:
 ## Deployment
 
 ### GitHub Repository
-Repository này được lưu trữ tại: `https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME`
+Repository này được lưu trữ tại: `https://github.com/duclinh21/Quan_ly_tai_lieu_cong_ty`
 
 ### Clone Repository
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
-cd YOUR_REPOSITORY_NAME
+git clone https://github.com/duclinh21/Quan_ly_tai_lieu_cong_ty.git
+cd Quan_ly_tai_lieu_cong_ty
 ```
 
 ### Cài đặt Dependencies
